@@ -152,3 +152,147 @@ HAVING COUNT(*) >= 2
 
 
 </details>
+
+## [Question 09](https://datalemur.com/questions/completed-trades)
+<details>
+  <summary>SQL Query</summary>
+
+  ```
+SELECT 
+u.city,
+COUNT(t.order_id) AS "total_orders"
+FROM trades AS "t"
+JOIN users AS "u"
+ON t.user_id = u.user_id 
+WHERE t.status = 'Completed'
+GROUP BY u.city
+ORDER BY COUNT(t.order_id) DESC
+LIMIt 3;
+  ```
+</details>
+
+<details>
+  <summary>Comments</summary>
+
+
+
+</details>
+
+
+
+## [Question 10](https://datalemur.com/questions/sql-avg-review-ratings)
+<details>
+  <summary>SQL Query</summary>
+
+  ```
+SELECT
+DATE_PART('MONTH', r.submit_date) AS "mth",
+r.product_id,
+ROUND(AVG(r.stars),2) AS "avg_stars"
+FROM reviews AS "r"
+GROUP BY DATE_PART('MONTH', r.submit_date),r.product_id
+ORDER BY DATE_PART('MONTH', r.submit_date), r.product_id;
+  ```
+</details>
+
+<details>
+  <summary>Comments</summary>
+
+
+
+</details>
+
+
+## [Question 11](https://datalemur.com/questions/sql-well-paid-employees)
+<details>
+  <summary>SQL Query</summary>
+
+  ```
+SELECT 
+employee_id,
+name
+FROM(SELECT
+e.employee_id,
+e.name,
+e.salary,
+e.manager_id,
+m.salary,
+(CASE WHEN e.salary > m.salary THEN 1 ELSE 0 END) AS "over_paid"
+FROM employee AS "e"
+LEFT JOIN employee AS "m"
+ON e.manager_id = m.employee_id
+WHERE e.manager_id IS NOT NULL
+) AS "salarytbl"
+WHERE salarytbl.over_paid = 1
+ORDER BY employee_id
+LIMIT 5
+  ```
+</details>
+
+<details>
+  <summary>Comments</summary>
+
+> Query is probably not optimised
+
+> A simpler query is to add `e.salary > m.salary` in the `WHERE` clause instead
+
+</details>
+
+
+
+## [Question 12](https://datalemur.com/questions/click-through-rate)
+<details>
+  <summary>SQL Query</summary>
+
+  ```
+SELECT 
+app_id,
+ROUND((100.0 * SUM(CASE WHEN event_type = 'click' THEN 1 ELSE 0 END)/
+SUM(CASE WHEN event_type = 'impression' THEN 1 ELSE 0 END)),2) AS "CTR"
+FROM events
+WHERE DATE_PART('YEAR', timestamp) = '2022'
+GROUP BY app_id
+
+  ```
+</details>
+
+<details>
+  <summary>Comments</summary>
+
+> SubQuery can also be used to solve this problem
+
+</details>
+
+
+
+## [Question 13](https://datalemur.com/questions/second-day-confirmation)
+<details>
+  <summary>SQL Query</summary>
+
+  ```
+SELECT 
+e.user_id
+-- e.signup_date,
+-- MIN(t.action_date::DATE),
+-- MAX(t.action_date::DATE),
+-- MAX(t.action_date::DATE) - MIN(t.action_date::DATE) AS "diff"
+FROM emails AS "e"
+JOIN texts AS "t"
+ON e.email_id = t.email_id
+GROUP BY e.user_id
+HAVING MAX(t.action_date::DATE) - MIN(t.action_date::DATE) = 1;
+  ```
+</details>
+
+<details>
+  <summary>Comments</summary>
+
+</details>
+
+
+
+
+
+
+
+
