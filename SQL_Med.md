@@ -21,40 +21,75 @@ WHERE t.row_num = 3
 
 </details>
 
-## [Question 02]()
+## [Question 02](https://datalemur.com/questions/sql-second-highest-salary)
 <details>
   <summary>SQL Query</summary>
 
   ```
-  
+  WITH salaryTbl AS (
+SELECT
+RANK() OVER ( ORDER BY salary DESC ),
+*
+FROM employee
+)
+SELECT
+salaryTbl.salary AS "second_highest_salary"
+FROM salaryTbl
+WHERE salaryTbl.rank = 2
   ```
 </details>
 
 <details>
   <summary>Comments</summary>
 
+> Use CTE to include a ranking column
+
+> Filter to rank 2 for second highest salary
+
 </details>
 
-## [Question 03]()
+## [Question 03](https://datalemur.com/questions/time-spent-snaps)
 <details>
   <summary>SQL Query</summary>
 
   ```
-  
+  SELECT 
+time_tbl.age_bucket,
+ROUND((time_tbl.send_time/(time_tbl.total_time) * 100.0),2) AS send_percent,
+ROUND((time_tbl.open_time/(time_tbl.total_time) * 100.0),2) AS open_percent
+FROM (
+SELECT 
+age.age_bucket AS age_bucket,
+SUM(act.time_spent) FILTER (WHERE act.activity_type = 'open') AS open_time,
+SUM(act.time_spent) FILTER (WHERE act.activity_type = 'send') AS send_time,
+(SUM(act.time_spent) FILTER (WHERE act.activity_type = 'open')) + 
+(SUM(act.time_spent) FILTER (WHERE act.activity_type = 'send')) AS total_time
+FROM activities AS act
+JOIN age_breakdown AS age
+ON act.user_id = age.user_id
+WHERE activity_type IN ('open','send')
+GROUP BY age.age_bucket) AS time_tbl
   ```
 </details>
 
 <details>
   <summary>Comments</summary>
 
+> Use `Filter` to only sum up the time when `activity_type` is `send` or `open`
+
 </details>
 
-## [Question 04]()
+## [Question 04](https://datalemur.com/questions/rolling-average-tweets)
 <details>
   <summary>SQL Query</summary>
 
   ```
-  
+  SELECT 
+user_id,
+tweet_date,
+ROUND(AVG(tweet_count) OVER (PARTITION BY user_id ORDER BY tweet_date 
+ROWS BETWEEN 2 PRECEDING AND CURRENT ROW),2) AS rolling_avg_3d
+FROM tweets;
   ```
 </details>
 
