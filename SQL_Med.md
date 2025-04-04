@@ -153,12 +153,26 @@ WHERE salaryTbl.rank <= 3
 
 </details>
 
-## [Question 07]()
+## [Question 07](https://datalemur.com/questions/supercloud-customer)
 <details>
   <summary>SQL Query</summary>
 
   ```
-  
+  WITH disTbl AS (
+SELECT 
+cc.customer_id AS cus_id,
+COUNT(DISTINCT p.product_category) as prod_count
+FROM customer_contracts AS cc 
+JOIN products AS p 
+ON p.product_id = cc.product_id
+GROUP BY cc.customer_id
+ORDER BY cc.customer_id
+)
+SELECT disTbl.cus_id AS customer_id
+FROM disTbl
+WHERE disTbl.prod_count = (
+  SELECT COUNT(DISTINCT product_category) FROM products
+)
   ```
 </details>
 
@@ -167,12 +181,28 @@ WHERE salaryTbl.rank <= 3
 
 </details>
 
-## [Question 08]()
+## [Question 08](https://datalemur.com/questions/odd-even-measurements)
 <details>
   <summary>SQL Query</summary>
 
   ```
-  
+  WITH tblrow AS (
+SELECT
+measurement_id,
+measurement_value,
+measurement_time,
+ROW_NUMBER() OVER (PARTITION BY DATE(measurement_time) ORDER BY (measurement_time) ASC)
+FROM measurements
+)
+
+SELECT
+-- *
+DATE(measurement_time),
+SUM(CASE WHEN (row_number % 2) = 1 THEN measurement_value ELSE 0 END ) AS odd_sum,
+SUM(CASE WHEN (row_number % 2) = 0 THEN measurement_value ELSE 0 END ) AS even_sum
+FROM tblrow
+GROUP BY DATE(measurement_time)
+ORDER BY DATE(measurement_time)
   ```
 </details>
 
@@ -181,12 +211,24 @@ WHERE salaryTbl.rank <= 3
 
 </details>
 
-## [Question 09]()
+## [Question 09](https://datalemur.com/questions/sql-swapped-food-delivery)
 <details>
   <summary>SQL Query</summary>
 
   ```
-  
+  WITH ordertbl AS (
+SELECT COUNT(order_id) AS ttl_order
+FROM orders
+)
+
+SELECT 
+CASE WHEN o.order_id % 2 != 0 AND o.order_id != ot.ttl_order THEN o.order_id + 1
+     WHEN o.order_id % 2 != 0 AND o.order_id = ot.ttl_order THEN o.order_id
+     ELSE o.order_id - 1 END as correct_order_id,
+o.item
+FROM orders AS o
+CROSS JOIN ordertbl AS ot
+ORDER BY correct_order_id
   ```
 </details>
 
